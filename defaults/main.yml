@@ -58,6 +58,7 @@ postgresql_hba_file: "{{postgresql_conf_directory}}/pg_hba.conf"
 postgresql_ident_file: "{{postgresql_conf_directory}}/pg_ident.conf"
 # Use data in another directory
 postgresql_data_directory: "/var/lib/postgresql/{{postgresql_version}}/{{postgresql_cluster_name}}"
+postgresql_data_directory_auto_create: true
 # If external_pid_file is not explicitly set, on extra PID file is written
 postgresql_external_pid_file: "/var/run/postgresql/{{postgresql_version}}-{{postgresql_cluster_name}}.pid"
 
@@ -628,6 +629,8 @@ postgresql_restart_after_crash: on
 postgresql_env:
   LC_ALL: "{{ postgresql_locale }}"
   LC_LCTYPE: "{{ postgresql_locale }}"
+  # Prevent service from automatically starting after install
+  RUNLEVEL: 1
 
 # APT settings
 postgresql_apt_key_id: ACCC4CF8

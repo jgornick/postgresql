@@ -9,6 +9,26 @@
     mode: 0700
   register: pgdata_dir_exist
 
+- name: PostgreSQL | Stat data directory cluster
+  stat:
+    path: "{{ postgresql_data_directory }}/{{ postgresql_version }}/{{ postgresql_cluster_name }}"
+    get_md5: no
+  register: stat_postgresql_data_directory
+
+- name: PostgreSQL | Stop service if data directory cluster does not exist
+  service:
+    name: postgresql
+    state: stopped
+  when: >
+    postgresql_data_directory_auto_create
+    and not stat_postgresql_data_directory.stat.exists
+
+- name: PostgreSQL | Create data directory cluster
+  shell: /usr/lib/postgresql/{{ postgresql_version }}/bin/initdb -D {{ postgresql_data_directory }}/{{ postgresql_version }}/{{ postgresql_cluster_name }}
+  when: >
+    postgresql_data_directory_auto_create
+    and not stat_postgresql_data_directory.stat.exists
+
 - name: PostgreSQL | Ensure the locale is generated
   locale_gen: name={{postgresql_locale}} state=present
 
