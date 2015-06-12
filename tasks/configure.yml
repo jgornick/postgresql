@@ -71,3 +71,23 @@
     name: postgresql
     state: restarted
   when: postgresql_configuration_pt1.changed or postgresql_configuration_pt2.changed
+
+- name: PostgreSQL | Create admin user
+  shell: >
+    /usr/lib/postgresql/{{ postgresql_version }}/bin/createuser -s -d -r {{ postgresql_admin_user }}
+  register: create_admin_user_result
+  changed_when: >
+    create_admin_user_result.rc == 0
+  failed_when: >
+    create_admin_user_result.rc != 0
+    and 'role "{{ postgresql_admin_user }}" already exists' not in create_admin_user_result.stderr
+
+- name: PostgreSQL | Create admin user database
+  shell: >
+    /usr/lib/postgresql/{{ postgresql_version }}/bin/createdb -U {{ postgresql_admin_user }} -O {{ postgresql_admin_user }} {{ postgresql_admin_user }}
+  register: create_admin_user_db_result
+  changed_when: >
+    create_admin_user_db_result.rc == 0
+  failed_when: >
+    create_admin_user_db_result.rc != 0
+    and 'database "{{ postgresql_admin_user }}" already exists' not in create_admin_user_db_result.stderr
